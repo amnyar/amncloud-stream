@@ -9,6 +9,7 @@ Item {
     anchors.fill: parent
 
     property string phone: ""
+    property int secondsRemaining: 59
 
     Rectangle {
         anchors.fill: parent
@@ -38,6 +39,8 @@ Item {
                 Layout.preferredWidth: 250
                 font.pixelSize: 16
                 inputMethodHints: Qt.ImhDigitsOnly
+                validator: RegExpValidator { regExp: /^[0-9]{6}$/ }
+                horizontalAlignment: TextInput.AlignHCenter
             }
 
             Button {
@@ -49,7 +52,7 @@ Item {
                 }
 
                 onClicked: {
-                    if (codeInput.text.length < 4) {
+                    if (!/^[0-9]{6}$/.test(codeInput.text)) {
                         statusText.text = "کد معتبر نیست"
                         return
                     }
@@ -64,6 +67,51 @@ Item {
                 color: "white"
                 font.pixelSize: 14
                 Layout.alignment: Qt.AlignHCenter
+                wrapMode: Text.WrapAnywhere
+                horizontalAlignment: Text.AlignHCenter
+            }
+
+            Text {
+                id: timerText
+                visible: resendTimer.running
+                text: "ارسال مجدد تا " + secondsRemaining + " ثانیه دیگر"
+                color: "#bbbbbb"
+                font.pixelSize: 13
+                Layout.alignment: Qt.AlignHCenter
+            }
+
+            Button {
+                id: resendButton
+                text: "ارسال مجدد کد"
+                visible: !resendTimer.running
+                Layout.preferredWidth: 250
+                background: Rectangle {
+                    color: "#00c853"
+                    radius: 10
+                }
+
+                onClicked: {
+                    resendButton.visible = false
+                    secondsRemaining = 59
+                    resendTimer.start()
+                    statusText.text = "در حال ارسال کد جدید . . ."
+                    sendCodeAgain(phone)
+                }
+            }
+        }
+    }
+
+    Timer {
+        id: resendTimer
+        interval: 1000
+        repeat: true
+        running: true
+        onTriggered: {
+            if (secondsRemaining > 0) {
+                secondsRemaining--
+            } else {
+                running = false
+                resendButton.visible = true
             }
         }
     }
@@ -75,14 +123,50 @@ Item {
 
         xhr.onreadystatechange = function() {
             if (xhr.readyState === XMLHttpRequest.DONE) {
-                if (xhr.status === 200) {
-                    statusText.text = "✅ ورود موفق !"
-                } else {
-                    statusText.text = "کد اشتباه است یا منقضی شده"
+                try {
+                    var res = JSON.parse(xhr.responseText)
+
+                    if (res.status === "success" || res.success === true) {
+                        statusText.text = "✅ ثبت ‌نام یا ورود با موفقیت انجام شد"
+                        stackView.clear()
+                        stackView.push("qrc:/gui/main.qml")
+                    } else {
+                        statusText.text = res.message || "کد اشتباه است یا منقضی شده"
+                    }
+                } catch (e) {
+                    statusText.text = "❌ خطا در پردازش پاسخ سرور"
                 }
             }
         }
 
         xhr.send(JSON.stringify({ phone: phone, code: code }))
+    }
+
+    function sendCodeAgain(phoneNumber) {
+        var xhr = new XMLHttpRequest()
+        xhr.open("POST", "https://bazicloud.com/wp-json/amncloud/v1/send-code")
+        xhr.setRequestHeader("Content-Type", "application/json")
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    statusText.text = "کد مجدداً ارسال شد"
+                } else {
+                    statusText.text = "خطا در ارسال مجدد کد"
+                }
+            }
+        }
+
+        xhr.send(JSON.stringify({ phone: phoneNumber }))
+    }
+
+    Component.onCompleted: {
+        if (typeof mainToolBar !== 'undefined') mainToolBar.visible = false
+        if (typeof settingsButton !== 'undefined') settingsButton.visible = false
+        if (typeof topMenu !== 'undefined') topMenu.visible = false
+
+
+        resendTimer.start()
+        resendButton.visible = false
     }
 }

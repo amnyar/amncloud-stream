@@ -1,5 +1,8 @@
 <RCC>
     <qresource prefix="/">
+        <file>gui/LoginWithPhone.qml</file>
+        <file>gui/VerifyCode.qml</file>         
+        <file>gui/Signup.qml</file>            
         <file>gui/main.qml</file>
         <file>gui/PcView.qml</file>
         <file>gui/AppView.qml</file>
