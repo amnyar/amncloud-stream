@@ -103,7 +103,7 @@ ApplicationWindow {
             // Perform our early initialization before constructing
             // the initial view and pushing it to the StackView
             doEarlyInit()
-            push(initialView)
+            push("qrc:/gui/LoginWithPhone.qml")
         }
 
         onCurrentItemChanged: {
