@@ -8,12 +8,12 @@ Item {
     objectName: "LoginWithPhone"
     anchors.fill: parent
 
-    signal loginSuccess() // Signal for successful login (maybe used later)
-    signal needsSignup(string phoneNum) // Signal when user doesn't exist
+    signal loginSuccess() 
+    signal needsSignup(string phoneNum) 
 
     property bool showTopIcons: false
     property int timerSeconds: 0
-    property Font defaultFont // Assume defined globally
+    property Font defaultFont 
 
     Timer {
         id: resendTimer
@@ -115,7 +115,7 @@ Item {
                          console.error("Error parsing send-code response:", e, xhr.responseText);
                          resendTimer.stop(); sendCodeBtn.enabled = true; timerText.visible = false;
                     }
-                } else if (xhr.status === 404) { // User not found
+                } else if (xhr.status === 404) { 
                     statusText.text = "کاربری با این شماره پیدا نشد. به صفحه ثبت نام هدایت می‌شوید..."
                     needsSignup(phoneNumber) // Emit signal to main.qml
                     resendTimer.stop()
