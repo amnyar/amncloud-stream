@@ -9,9 +9,9 @@ Item {
     objectName: "ProfileView"
     anchors.fill: parent
 
-    property string userName: "در حال بارگذاری . . ."
+    property string userName: "در حال بارگذاری..."
     property string userIdentifier: "..."
-    property url avatarUrl: "qrc:/placeholder_avatar.png"
+    property url avatarUrl: "https://placehold.co/60x60/cccccc/000/png?text=AV" // Placeholder URL
     property int coinBalance: 0
     property int walletBalance: 0
     property string subscriptionStatus: "وضعیت نامشخص"
@@ -51,20 +51,14 @@ Item {
                                 stackView.pop();
                             }
                         }
-                        contentItem: Text {
-                            text: backBtn.text
-                            font: backBtn.font
-                            color: "white"
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                        }
+                        contentItem: Text { text: backBtn.text; font: backBtn.font; color: "white"; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                     }
 
                     Item { Layout.fillWidth: true }
 
                     Image {
                         id: logoProfile
-                        source: "qrc:/placeholder_logo.png"
+                        source: "https://placehold.co/100x40/E74C3C/FFF/png?text=LOGO" // Placeholder URL
                         Layout.preferredWidth: 100
                         Layout.preferredHeight: 40
                         fillMode: Image.PreserveAspectFit
@@ -83,40 +77,22 @@ Item {
 
                 Rectangle {
                     id: coinsArea
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 80
-                    Layout.columnSpan: 1
-                    color: "#2a2a2a"
-                    radius: 8
-
+                    Layout.fillWidth: true; Layout.preferredHeight: 80; Layout.columnSpan: 1; color: "#2a2a2a"; radius: 8
                     RowLayout {
-                       anchors.centerIn: parent
-                       spacing: 10
-                        Image {
-                            source: "qrc:/placeholder_coin_icon.png"
-                            width: 40; height: 40
-                        }
+                       anchors.centerIn: parent; spacing: 10
+                        Image { source: "https://placehold.co/40x40/FFD700/000/png?text=C"; width: 40; height: 40 } // Placeholder URL
                        ColumnLayout {
                             Text { text: "سکه ها"; color: "#cccccc"; font.pixelSize: 14; font.family: defaultFont }
                             Text { text: coinBalance; color: "white"; font.pixelSize: 18; font.bold: true; font.family: defaultFont }
                        }
                     }
                 }
-
                  Item { Layout.fillWidth: true; Layout.preferredHeight: 1 }
-
                 Rectangle {
                     id: userInfoArea
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 80
-                    Layout.columnSpan: 1
-                    color: "transparent"
-
+                    Layout.fillWidth: true; Layout.preferredHeight: 80; Layout.columnSpan: 1; color: "transparent"
                     RowLayout {
-                        anchors.verticalCenter: parent
-                        anchors.right: parent.right
-                        spacing: 15
-
+                        anchors.verticalCenter: parent; anchors.right: parent.right; spacing: 15
                         ColumnLayout {
                             anchors.verticalCenter: parent
                             Text { text: "نام و نام خانوادگی"; color: "#cccccc"; font.pixelSize: 14; horizontalAlignment: Text.AlignRight; font.family: defaultFont }
@@ -126,101 +102,51 @@ Item {
                        Image {
                            id: avatarImage
                            source: avatarUrl
-                           width: 60; height: 60
-                           fillMode: Image.PreserveAspectCrop
+                           width: 60; height: 60; fillMode: Image.PreserveAspectCrop; asynchronous: true
                        }
                     }
                 }
 
                 Rectangle {
                     id: subscriptionArea
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 120
-                    Layout.columnSpan: 1
-                    color: "#2a2a2a"
-                    radius: 8
-
+                    Layout.fillWidth: true; Layout.preferredHeight: 120; Layout.columnSpan: 1; color: "#2a2a2a"; radius: 8
                     ColumnLayout {
-                        anchors.centerIn: parent
-                        spacing: 10
+                        anchors.centerIn: parent; spacing: 10
                         Text { text: "وضعیت اشتراک"; color: "#cccccc"; font.pixelSize: 14; Layout.alignment: Qt.AlignHCenter; font.family: defaultFont }
                         Text { id: subStatusText; text: subscriptionStatus; color: "white"; font.pixelSize: 16; Layout.alignment: Qt.AlignHCenter; font.family: defaultFont }
-                        Button {
-                            text: "خرید اشتراک"
-                            font.family: defaultFont
-                            Layout.alignment: Qt.AlignHCenter
-                            background: Rectangle { color: "#555"; radius: 5 }
-                        }
+                        Button { text: "خرید اشتراک"; font.family: defaultFont; Layout.alignment: Qt.AlignHCenter; background: Rectangle { color: "#555"; radius: 5 } }
                     }
                 }
 
                  Rectangle {
                      id: walletArea
-                     Layout.fillWidth: true
-                     Layout.preferredHeight: 120
-                     Layout.columnSpan: 2
-                     color: "#2a2a2a"
-                     radius: 8
-
+                     Layout.fillWidth: true; Layout.preferredHeight: 120; Layout.columnSpan: 2; color: "#2a2a2a"; radius: 8
                      ColumnLayout {
-                         anchors.centerIn: parent
-                         spacing: 10
+                         anchors.centerIn: parent; spacing: 10
                          Text { text: "موجودی کیف پول"; color: "#cccccc"; font.pixelSize: 14; Layout.alignment: Qt.AlignHCenter; font.family: defaultFont }
                          Text { id: walletText; text: walletBalance.toLocaleString(Qt.locale("fa_IR"), 'f', 0) + " تومان"; color: "white"; font.pixelSize: 20; font.bold: true; Layout.alignment: Qt.AlignHCenter; font.family: defaultFont }
-                         Button {
-                             text: "شارژ کیف پول"
-                             font.family: defaultFont
-                             Layout.alignment: Qt.AlignHCenter
-                             background: Rectangle { color: "red"; radius: 5 }
-                         }
+                         Button { text: "شارژ کیف پول"; font.family: defaultFont; Layout.alignment: Qt.AlignHCenter; background: Rectangle { color: "red"; radius: 5 } }
                      }
                  }
             }
 
              ColumnLayout {
-                 Layout.fillWidth: true
-                 Layout.topMargin: 30
-                 spacing: 10
-
-                Text {
-                    text: "اطلاعیه ها"
-                    color: "white"
-                    font.pixelSize: 18
-                    font.family: defaultFont
-                    Layout.leftMargin: 20
-                }
-
+                 Layout.fillWidth: true; Layout.topMargin: 30; spacing: 10
+                Text { text: "اطلاعیه ها"; color: "white"; font.pixelSize: 18; font.family: defaultFont; Layout.leftMargin: 20 }
                 RowLayout {
-                     Layout.fillWidth: true
-                     Layout.leftMargin: 20
-                     Layout.rightMargin: 20
-                     spacing: 20
-
+                     Layout.fillWidth: true; Layout.leftMargin: 20; Layout.rightMargin: 20; spacing: 20
                      Repeater {
                          model: noticesModel
                          delegate: Rectangle {
-                             width: (mainColumnLayout.width - (2*20) - (2*20) ) / 3
-                             height: 100
-                             color: "#2a2a2a"
-                             radius: 8
+                             width: (mainColumnLayout.width - (2*20) - (2*20) ) / 3; height: 100; color: "#2a2a2a"; radius: 8
                              property alias noticeUrl: model.url
-
                              RowLayout {
-                                 anchors.fill: parent
-                                 anchors.margins: 10
-                                 spacing: 10
-
+                                 anchors.fill: parent; anchors.margins: 10; spacing: 10
                                  Image {
-                                     source: model.iconUrl
-                                     Layout.preferredWidth: 40
-                                     Layout.preferredHeight: 40
-                                     fillMode: Image.PreserveAspectFit
-                                     Layout.alignment: Qt.AlignVCenter
+                                     source: model.iconUrl; Layout.preferredWidth: 40; Layout.preferredHeight: 40; fillMode: Image.PreserveAspectFit; Layout.alignment: Qt.AlignVCenter; asynchronous: true
                                  }
                                  ColumnLayout {
-                                      Layout.fillWidth: true
-                                      Layout.fillHeight: true
-
+                                      Layout.fillWidth: true; Layout.fillHeight: true
                                      Text { text: model.title; color: "white"; font.bold: true; font.family: defaultFont }
                                      Text { text: model.description; color: "#cccccc"; wrapMode: Text.WordWrap; font.family: defaultFont }
                                  }
@@ -231,18 +157,11 @@ Item {
                 }
              }
 
-
             Item { Layout.fillHeight: true }
-
              Text {
-                 id: statusText // For showing errors if API calls fail
-                 Layout.fillWidth: true
-                 horizontalAlignment: Text.AlignHCenter
-                 color: "yellow"
-                 wrapMode: Text.Wrap
-                 font.family: defaultFont
+                 id: statusText
+                 Layout.fillWidth: true; horizontalAlignment: Text.AlignHCenter; color: "yellow"; wrapMode: Text.Wrap; font.family: defaultFont
              }
-
         }
     }
 
@@ -251,7 +170,6 @@ Item {
         var xhr = new XMLHttpRequest();
         xhr.open("GET", "https://bazicloud.com/wp-json/amncloud/v1/profile");
         xhr.withCredentials = true;
-
         xhr.onreadystatechange = function() {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 console.log("Profile API response status:", xhr.status)
@@ -261,7 +179,7 @@ Item {
                         if (res.status === "success") {
                             userName = res.name || "نامشخص";
                             userIdentifier = res.email || "...";
-                            avatarUrl = res.avatar || "qrc:/placeholder_avatar.png";
+                            avatarUrl = res.avatar || "https://placehold.co/60x60/cccccc/000/png?text=AV";
                             coinBalance = res.coins || 0;
                             walletBalance = res.wallet || 0;
                             statusText.text = "";
@@ -277,9 +195,7 @@ Item {
                 } else if (xhr.status === 401 || xhr.status === 403) {
                      console.error("Profile API auth failed (status " + xhr.status + "). Cookies likely missing/invalid.");
                      statusText.text = "خطای احراز هویت. لطفاً دوباره وارد شوید.";
-                     // stackView.clear(); stackView.push("qrc:/gui/LoginWithPhone.qml");
-                }
-                else {
+                } else {
                     console.error("Profile API request failed with status:", xhr.status);
                     statusText.text = "خطا در ارتباط با سرور برای دریافت پروفایل";
                 }
@@ -314,24 +230,21 @@ Item {
 
      function getIconForNotice(title) {
          title = title.toLowerCase();
-         if (title.includes("telegram")) return "qrc:/placeholder_telegram.png";
-         if (title.includes("youtube")) return "qrc:/placeholder_youtube.png";
-         if (title.includes("instagram")) return "qrc:/placeholder_instagram.png";
-         return "qrc:/placeholder_notice.png";
+         if (title.includes("telegram")) return "https://placehold.co/40x40/2AABEE/FFF/png?text=TG"; // Telegram Blue
+         if (title.includes("youtube")) return "https://placehold.co/40x40/FF0000/FFF/png?text=YT"; // YouTube Red
+         if (title.includes("instagram")) return "https://placehold.co/40x40/E1306C/FFF/png?text=IG"; // Instagram Pink
+         return "https://placehold.co/40x40/888/FFF/png?text=N";
      }
      function getUrlForNotice(text) {
-         // Basic check for URL in text - improve if needed
          var urlRegex = /(https?:\/\/[^\s]+)/g;
          var match = text.match(urlRegex);
-         return match ? match[0] : "https://bazicloud.com"; // Default URL
+         return match ? match[0] : "https://bazicloud.com";
      }
-
 
     Component.onCompleted: {
          if (typeof mainToolBar !== 'undefined') mainToolBar.visible = false
          if (typeof settingsButton !== 'undefined') settingsButton.visible = false
          if (typeof topMenu !== 'undefined') topMenu.visible = false
-
          fetchProfileData();
          fetchNoticesData();
     }
