@@ -11,7 +11,7 @@ Item {
 
     property string userName: "در حال بارگذاری..."
     property string userIdentifier: "..."
-    property url avatarUrl: "https://placehold.co/60x60/cccccc/000/png?text=AV" // Placeholder URL
+    property url avatarUrl: "https://placehold.co/60x60/cccccc/000/png?text=AV"
     property int coinBalance: 0
     property int walletBalance: 0
     property string subscriptionStatus: "وضعیت نامشخص"
@@ -29,58 +29,31 @@ Item {
 
             Rectangle {
                 id: topBarProfile
-                Layout.fillWidth: true
-                Layout.preferredHeight: 60
-                color: "#1e1e1e"
-
+                Layout.fillWidth: true; Layout.preferredHeight: 60; color: "#1e1e1e"
                 RowLayout {
-                    anchors.fill: parent
-                    anchors.leftMargin: 20
-                    anchors.rightMargin: 20
-                    spacing: 15
-
+                    anchors.fill: parent; anchors.leftMargin: 20; anchors.rightMargin: 20; spacing: 15
                     Button {
                         id: backBtn
-                        text: "< بازگشت"
-                        font.family: defaultFont
-                        font.pixelSize: 16
-                        Layout.alignment: Qt.AlignVCenter
-                        flat: true
-                        onClicked: {
-                            if (stackView.depth > 1) {
-                                stackView.pop();
-                            }
-                        }
+                        text: "< بازگشت"; font.family: defaultFont; font.pixelSize: 16; Layout.alignment: Qt.AlignVCenter; flat: true
+                        onClicked: { if (stackView.depth > 1) { stackView.pop(); } }
                         contentItem: Text { text: backBtn.text; font: backBtn.font; color: "white"; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                     }
-
                     Item { Layout.fillWidth: true }
-
                     Image {
                         id: logoProfile
-                        source: "https://placehold.co/100x40/E74C3C/FFF/png?text=LOGO" // Placeholder URL
-                        Layout.preferredWidth: 100
-                        Layout.preferredHeight: 40
-                        fillMode: Image.PreserveAspectFit
-                        Layout.alignment: Qt.AlignVCenter
+                        source: "https://placehold.co/100x40/E74C3C/FFF/png?text=LOGO"; Layout.preferredWidth: 100; Layout.preferredHeight: 40; fillMode: Image.PreserveAspectFit; Layout.alignment: Qt.AlignVCenter
                     }
                 }
             }
 
             GridLayout {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 200
-                Layout.margins: 20
-                columns: 3
-                columnSpacing: 20
-                rowSpacing: 20
-
+                Layout.fillWidth: true; Layout.preferredHeight: 200; Layout.margins: 20; columns: 3; columnSpacing: 20; rowSpacing: 20
                 Rectangle {
                     id: coinsArea
                     Layout.fillWidth: true; Layout.preferredHeight: 80; Layout.columnSpan: 1; color: "#2a2a2a"; radius: 8
                     RowLayout {
                        anchors.centerIn: parent; spacing: 10
-                        Image { source: "https://placehold.co/40x40/FFD700/000/png?text=C"; width: 40; height: 40 } // Placeholder URL
+                        Image { source: "https://placehold.co/40x40/FFD700/000/png?text=C"; width: 40; height: 40 }
                        ColumnLayout {
                             Text { text: "سکه ها"; color: "#cccccc"; font.pixelSize: 14; font.family: defaultFont }
                             Text { text: coinBalance; color: "white"; font.pixelSize: 18; font.bold: true; font.family: defaultFont }
@@ -99,11 +72,7 @@ Item {
                             Text { id: nameText; text: userName; color: "white"; font.pixelSize: 16; font.bold: true; horizontalAlignment: Text.AlignRight; font.family: defaultFont }
                             Text { id: identifierText; text: userIdentifier; color: "#aaaaaa"; font.pixelSize: 12; horizontalAlignment: Text.AlignRight; font.family: defaultFont }
                        }
-                       Image {
-                           id: avatarImage
-                           source: avatarUrl
-                           width: 60; height: 60; fillMode: Image.PreserveAspectCrop; asynchronous: true
-                       }
+                       Image { id: avatarImage; source: avatarUrl; width: 60; height: 60; fillMode: Image.PreserveAspectCrop; asynchronous: true }
                     }
                 }
 
@@ -139,19 +108,21 @@ Item {
                          model: noticesModel
                          delegate: Rectangle {
                              width: (mainColumnLayout.width - (2*20) - (2*20) ) / 3; height: 100; color: "#2a2a2a"; radius: 8
-                             property alias noticeUrl: model.url
+                             property alias noticeUrl: url // Corrected: Use role name directly for alias
+
                              RowLayout {
                                  anchors.fill: parent; anchors.margins: 10; spacing: 10
                                  Image {
-                                     source: model.iconUrl; Layout.preferredWidth: 40; Layout.preferredHeight: 40; fillMode: Image.PreserveAspectFit; Layout.alignment: Qt.AlignVCenter; asynchronous: true
+                                     source: iconUrl // Corrected: Use role name directly
+                                     Layout.preferredWidth: 40; Layout.preferredHeight: 40; fillMode: Image.PreserveAspectFit; Layout.alignment: Qt.AlignVCenter; asynchronous: true
                                  }
                                  ColumnLayout {
                                       Layout.fillWidth: true; Layout.fillHeight: true
-                                     Text { text: model.title; color: "white"; font.bold: true; font.family: defaultFont }
-                                     Text { text: model.description; color: "#cccccc"; wrapMode: Text.WordWrap; font.family: defaultFont }
+                                     Text { text: title; color: "white"; font.bold: true; font.family: defaultFont } // Corrected
+                                     Text { text: description; color: "#cccccc"; wrapMode: Text.WordWrap; font.family: defaultFont } // Corrected
                                  }
                              }
-                              MouseArea { anchors.fill: parent; onClicked: { if(noticeUrl) Qt.openUrlExternally(noticeUrl) } }
+                             MouseArea { anchors.fill: parent; onClicked: { if(noticeUrl) Qt.openUrlExternally(noticeUrl) } } // Using alias is fine now
                          }
                      }
                 }
@@ -230,9 +201,9 @@ Item {
 
      function getIconForNotice(title) {
          title = title.toLowerCase();
-         if (title.includes("telegram")) return "https://placehold.co/40x40/2AABEE/FFF/png?text=TG"; // Telegram Blue
-         if (title.includes("youtube")) return "https://placehold.co/40x40/FF0000/FFF/png?text=YT"; // YouTube Red
-         if (title.includes("instagram")) return "https://placehold.co/40x40/E1306C/FFF/png?text=IG"; // Instagram Pink
+         if (title.includes("telegram")) return "https://placehold.co/40x40/2AABEE/FFF/png?text=TG";
+         if (title.includes("youtube")) return "https://placehold.co/40x40/FF0000/FFF/png?text=YT";
+         if (title.includes("instagram")) return "https://placehold.co/40x40/E1306C/FFF/png?text=IG";
          return "https://placehold.co/40x40/888/FFF/png?text=N";
      }
      function getUrlForNotice(text) {
