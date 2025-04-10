@@ -15,7 +15,9 @@ FontLoader {
     source: "qrc:/fonts/IRANSans.ttf"
 }
 
-property string defaultFont: iranFont.name
+Component.onCompleted: {
+    defaultFont = iranFont.name
+}
 
 ApplicationWindow {
     property bool pollingActive: false
