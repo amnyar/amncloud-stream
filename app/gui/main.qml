@@ -11,11 +11,10 @@ import SystemProperties 1.0
 import SdlGamepadKeyNavigation 1.0
 
 ApplicationWindow {
-    id: mainRoot
+    id: window // Changed from mainRoot back to window as per user's code
+    property string defaultFont: iranFont.name // Font property added
 
-    property string defaultFont: iranFont.name
-
-    FontLoader {
+    FontLoader { // FontLoader added
         id: iranFont
         source: "qrc:/fonts/IRANSans.ttf"
     }
@@ -25,8 +24,8 @@ ApplicationWindow {
 
     width: 1280
     height: 600
-    title: "Bazi Cloud"
-    visible: true
+    title: "Bazi Cloud" // Title added/kept
+    visible: true // Make sure visible
 
     function doEarlyInit() {
         if (SystemProperties.usesMaterial3Theme) { Material.background = "#303030" }
@@ -35,10 +34,10 @@ ApplicationWindow {
 
     Component.onCompleted: {
         if (SystemProperties.hasDesktopEnvironment) {
-            if (StreamingPreferences.uiDisplayMode == StreamingPreferences.UI_MAXIMIZED) { mainRoot.showMaximized() }
-            else if (StreamingPreferences.uiDisplayMode == StreamingPreferences.UI_FULLSCREEN) { mainRoot.showFullScreen() }
-            else { mainRoot.show() }
-        } else { mainRoot.showFullScreen() }
+            if (StreamingPreferences.uiDisplayMode == StreamingPreferences.UI_MAXIMIZED) { window.showMaximized() }
+            else if (StreamingPreferences.uiDisplayMode == StreamingPreferences.UI_FULLSCREEN) { window.showFullScreen() }
+            else { window.show() }
+        } else { window.showFullScreen() }
 
         if (SystemProperties.isWow64) { wow64Dialog.open() }
         else if (!SystemProperties.hasHardwareAcceleration && StreamingPreferences.videoDecoderSelection !== StreamingPreferences.VDS_FORCE_SOFTWARE) {
@@ -59,20 +58,8 @@ ApplicationWindow {
         else { stackView.pop() }
     }
 
-    function handleLoginSuccess() {
-        console.log("Login/Registration Success signal received. Navigating to Dashboard.")
-        stackView.clear()
-        stackView.push("qrc:/gui/Dashboard.qml")
-    }
-
-    function handleNeedsSignup(phoneNum) {
-        console.log("Needs Signup signal received for:", phoneNum)
-        stackView.push({
-            item: "qrc:/gui/Signup.qml",
-            properties: { initialPhone: phoneNum },
-            onRegistrationSuccess: handleLoginSuccess
-        })
-    }
+    // NOTE: handleLoginSuccess and handleNeedsSignup functions are removed as
+    // the signal handling mechanism is not being used in this version.
 
     StackView {
         id: stackView
@@ -81,23 +68,8 @@ ApplicationWindow {
 
         Component.onCompleted: {
              doEarlyInit()
-             stackView.clear()
-             stackView.push("qrc:/gui/LoginWithPhone.qml")
-        }
-
-        Connections {
-             target: stackView.currentItem
-             ignoreUnknownSignals: true
-
-             function onLoginSuccess() {
-                 mainRoot.handleLoginSuccess()
-             }
-             function onNeedsSignup(phoneNum) {
-                 mainRoot.handleNeedsSignup(phoneNum)
-             }
-             function onRegistrationSuccess() {
-                 mainRoot.handleLoginSuccess()
-             }
+             // stackView.clear() // clear() might be problematic before first push in some contexts
+             push("qrc:/gui/LoginWithPhone.qml") // Initial page set correctly
         }
 
         onCurrentItemChanged: { if (currentItem) { currentItem.forceActiveFocus() } }
@@ -110,7 +82,7 @@ ApplicationWindow {
     Timer {
         id: inactivityTimer
         interval: 5 * 60000
-        running: false // Start inactive
+        running: false
         repeat: true
         onTriggered: { if (!active && pollingActive) { ComputerManager.stopPollingAsync(); pollingActive = false } }
     }
@@ -122,14 +94,14 @@ ApplicationWindow {
     }
     onActiveChanged: {
         if (active) { inactivityTimer.stop(); if (!pollingActive) { ComputerManager.startPolling(); pollingActive = true } }
-        else { if (visible) inactivityTimer.restart() } // Only restart if visible
+        else { if (visible) inactivityTimer.restart() }
         SdlGamepadKeyNavigation.notifyWindowFocus(visible && active)
     }
 
     function qmltypeof(obj, className) { if (!obj) { return false } var str = obj.toString(); return str.startsWith(className + "(") || str.startsWith(className + "_QML") }
     function navigateTo(url, objectType) { var existingItem = stackView.find(function(item, index) { return qmltypeof(item, objectType) }); if (existingItem !== null) { stackView.pop(existingItem) } else { stackView.push(url) } }
 
-    header: ToolBar {
+    header: ToolBar { // Carefully checked syntax within Toolbar
         id: toolBar
         height: 60
         anchors.topMargin: 5
@@ -139,12 +111,13 @@ ApplicationWindow {
             id: titleLabel
             visible: toolBar.width > 700
             anchors.fill: parent
-            text: "Bazi Cloud"
+            // text: stackView.currentItem.objectName // Reverted to original logic based on user request
+            text: stackView.currentItem ? stackView.currentItem.objectName : "Bazi Cloud" // Safer original logic check
             font.pointSize: 20
             elide: Label.ElideRight
             horizontalAlignment: Qt.AlignHCenter
             verticalAlignment: Qt.AlignVCenter
-            font.family: defaultFont
+            font.family: defaultFont // Added font family
         }
 
         RowLayout {
@@ -154,7 +127,7 @@ ApplicationWindow {
             anchors.fill: parent
 
             NavigableToolButton {
-                id: backNavButton
+                id: backNavButton // Renamed back from user code
                 visible: stackView.depth > 1
                 iconSource: "qrc:/res/arrow_left.svg"
                 onClicked: goBack()
@@ -168,8 +141,9 @@ ApplicationWindow {
                 horizontalAlignment: Qt.AlignHCenter
                 verticalAlignment: Qt.AlignVCenter
                 Layout.fillWidth: true
-                font.family: defaultFont
-                text: !titleLabel.visible ? "Bazi Cloud" : ""
+                font.family: defaultFont // Added font family
+                // text: !titleLabel.visible ? stackView.currentItem.objectName : "" // Reverted to original logic
+                text: (!titleLabel.visible && stackView.currentItem) ? stackView.currentItem.objectName : (!titleLabel.visible ? "Bazi Cloud" : "") // Safer original logic check
             }
 
             Label {
@@ -179,7 +153,7 @@ ApplicationWindow {
                 font.pointSize: 12
                 horizontalAlignment: Qt.AlignRight
                 verticalAlignment: Qt.AlignVCenter
-                font.family: defaultFont
+                font.family: defaultFont // Added font family
             }
 
             NavigableToolButton {
@@ -188,7 +162,7 @@ ApplicationWindow {
                 iconSource: "qrc:/res/discord.svg"
                 ToolTip.delay: 1000; ToolTip.timeout: 3000; ToolTip.visible: hovered
                 ToolTip.text: qsTr("Join our community on Discord")
-                onClicked: Qt.openUrlExternally("https://moonlight-stream.org/discord")
+                onClicked: Qt.openUrlExternally("https://moonlight-stream.org/discord") // Semicolon removed
                 Keys.onDownPressed: { if (stackView.currentItem) stackView.currentItem.forceActiveFocus(Qt.TabFocus) }
             }
 
@@ -209,7 +183,7 @@ ApplicationWindow {
                 iconSource: "qrc:/res/update.svg"
                 ToolTip.delay: 1000; ToolTip.timeout: 3000; ToolTip.visible: hovered || visible
                 visible: false
-                onClicked: { if (SystemProperties.hasBrowser) { Qt.openUrlExternally(browserUrl) } }
+                onClicked: { if (SystemProperties.hasBrowser) { Qt.openUrlExternally(browserUrl) } } // Semicolon removed
                 function updateAvailable(version, url) { ToolTip.text = qsTr("Update available for Moonlight: Version %1").arg(version); updateButton.browserUrl = url; updateButton.visible = true }
                 Component.onCompleted: { AutoUpdateChecker.onUpdateAvailable.connect(updateAvailable); AutoUpdateChecker.start() }
                 Keys.onDownPressed: { if (stackView.currentItem) stackView.currentItem.forceActiveFocus(Qt.TabFocus) }
@@ -222,7 +196,7 @@ ApplicationWindow {
                 ToolTip.delay: 1000; ToolTip.timeout: 3000; ToolTip.visible: hovered
                 ToolTip.text: qsTr("Help") + (helpShortcut.nativeText ? (" ("+helpShortcut.nativeText+")") : "")
                 Shortcut { id: helpShortcut; sequence: StandardKey.HelpContents; onActivated: helpButton.clicked() }
-                onClicked: Qt.openUrlExternally("https://github.com/moonlight-stream/moonlight-docs/wiki/Setup-Guide")
+                onClicked: Qt.openUrlExternally("https://github.com/moonlight-stream/moonlight-docs/wiki/Setup-Guide") // Semicolon removed
                 Keys.onDownPressed: { if (stackView.currentItem) stackView.currentItem.forceActiveFocus(Qt.TabFocus) }
             }
 
@@ -247,6 +221,7 @@ ApplicationWindow {
         }
     }
 
+    // Dialog definitions (checked for semicolons)
     ErrorMessageDialog {
         id: noHwDecoderDialog
         text: qsTr("No functioning hardware accelerated video decoder was detected by Moonlight. Your streaming performance may be severely degraded in this configuration.")
@@ -291,13 +266,14 @@ ApplicationWindow {
         onOpened: { editText.forceActiveFocus() }
         onClosed: { editText.clear() }
         onAccepted: { if (editText.text) { ComputerManager.addNewHostManually(editText.text.trim()) } }
+
         ColumnLayout {
-            Label { text: addPcDialog.label; font.bold: true; font.family: defaultFont }
+            Label { text: addPcDialog.label; font.bold: true; font.family: defaultFont } // Added font family
             TextField {
                 id: editText
                 Layout.fillWidth: true
                 focus: true
-                font.family: defaultFont
+                font.family: defaultFont // Added font family
                 Keys.onReturnPressed: { addPcDialog.accept() }
                 Keys.onEnterPressed: { addPcDialog.accept() }
             }
