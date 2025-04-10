@@ -10,16 +10,16 @@ import StreamingPreferences 1.0
 import SystemProperties 1.0
 import SdlGamepadKeyNavigation 1.0
 
-FontLoader {
-    id: iranFont
-    source: "qrc:/fonts/IRANSans.ttf"
-}
-
-Component.onCompleted: {
-    defaultFont = iranFont.name
-}
 
 ApplicationWindow {
+
+    FontLoader {
+    id: iranFont
+    source: "qrc:/fonts/IRANSans.ttf"
+    }
+    
+	property string defaultFont: iranFont.name
+
     property bool pollingActive: false
 
     // Set by SettingsView to force the back operation to pop all
