@@ -94,8 +94,9 @@ ApplicationWindow {
         Component.onCompleted: {
              doEarlyInit()
              stackView.clear()
-             stackView.push("qrc:/gui/LoginWithPhone.qml") 
+            // stackView.push("qrc:/gui/LoginWithPhone.qml") 
              // stackView.push("qrc:/gui/Dashboard.qml") 
+			 stackView.push("qrc:/gui/Profile.qml") 
         }
 
         onCurrentItemChanged: {
