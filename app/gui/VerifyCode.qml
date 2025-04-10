@@ -24,6 +24,7 @@ Item {
                 color: "white"
                 font.pixelSize: 18
                 Layout.alignment: Qt.AlignHCenter
+                font.family: defaultFont
             }
 
             Text {
@@ -31,6 +32,7 @@ Item {
                 color: "#aaaaaa"
                 font.pixelSize: 14
                 Layout.alignment: Qt.AlignHCenter
+                font.family: defaultFont
             }
 
             TextField {
@@ -38,14 +40,16 @@ Item {
                 placeholderText: "کد ۶ رقمی"
                 Layout.preferredWidth: 250
                 font.pixelSize: 16
+                font.family: defaultFont
                 inputMethodHints: Qt.ImhDigitsOnly
                 validator: RegExpValidator { regExp: /^[0-9]{6}$/ }
                 horizontalAlignment: TextInput.AlignHCenter
             }
 
             Button {
-                text: "تایید و ورود"
+                text: "تأیید و ورود"
                 Layout.preferredWidth: 250
+                font.family: defaultFont
                 background: Rectangle {
                     color: "red"
                     radius: 10
@@ -69,6 +73,7 @@ Item {
                 Layout.alignment: Qt.AlignHCenter
                 wrapMode: Text.WrapAnywhere
                 horizontalAlignment: Text.AlignHCenter
+                font.family: defaultFont
             }
 
             Text {
@@ -78,6 +83,7 @@ Item {
                 color: "#bbbbbb"
                 font.pixelSize: 13
                 Layout.alignment: Qt.AlignHCenter
+                font.family: defaultFont
             }
 
             Button {
@@ -85,6 +91,7 @@ Item {
                 text: "ارسال مجدد کد"
                 visible: !resendTimer.running
                 Layout.preferredWidth: 250
+                font.family: defaultFont
                 background: Rectangle {
                     color: "#00c853"
                     radius: 10
@@ -105,10 +112,12 @@ Item {
         id: resendTimer
         interval: 1000
         repeat: true
-        running: true
+        running: false
+
         onTriggered: {
             if (secondsRemaining > 0) {
                 secondsRemaining--
+                timerText.text = "ارسال مجدد تا " + secondsRemaining + " ثانیه دیگر"
             } else {
                 running = false
                 resendButton.visible = true
@@ -121,15 +130,15 @@ Item {
         xhr.open("POST", "https://bazicloud.com/wp-json/amncloud/v1/verify-code")
         xhr.setRequestHeader("Content-Type", "application/json")
 
-        xhr.onreadystatechange = function() {
+        xhr.onreadystatechange = function () {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 try {
                     var res = JSON.parse(xhr.responseText)
 
                     if (res.status === "success" || res.success === true) {
-                        statusText.text = "✅ ثبت ‌نام یا ورود با موفقیت انجام شد"
+                        statusText.text = "✅ ثبت‌نام یا ورود با موفقیت انجام شد"
                         stackView.clear()
-                        stackView.push("qrc:/gui/main.qml")
+                        stackView.push("qrc:/gui/Dashboard.qml")
                     } else {
                         statusText.text = res.message || "کد اشتباه است یا منقضی شده"
                     }
@@ -164,7 +173,6 @@ Item {
         if (typeof mainToolBar !== 'undefined') mainToolBar.visible = false
         if (typeof settingsButton !== 'undefined') settingsButton.visible = false
         if (typeof topMenu !== 'undefined') topMenu.visible = false
-
 
         resendTimer.start()
         resendButton.visible = false

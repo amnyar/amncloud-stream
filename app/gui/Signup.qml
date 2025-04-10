@@ -9,6 +9,7 @@ Item {
     anchors.fill: parent
 
     property int secondsRemaining: 59
+    property bool codeSent: false
 
     Rectangle {
         anchors.fill: parent
@@ -19,7 +20,8 @@ Item {
             spacing: 12
 
             Text {
-                text: "ثبت نام کاربر جدید"
+                text: "ثبت ‌نام کاربر جدید"
+                font.family: defaultFont
                 color: "white"
                 font.pixelSize: 20
                 horizontalAlignment: Text.AlignHCenter
@@ -29,6 +31,7 @@ Item {
             TextField {
                 id: nameInput
                 placeholderText: "نام"
+                font.family: defaultFont
                 Layout.preferredWidth: 250
                 font.pixelSize: 16
                 horizontalAlignment: TextInput.AlignHCenter
@@ -37,6 +40,7 @@ Item {
             TextField {
                 id: familyInput
                 placeholderText: "نام خانوادگی"
+                font.family: defaultFont
                 Layout.preferredWidth: 250
                 font.pixelSize: 16
                 horizontalAlignment: TextInput.AlignHCenter
@@ -45,6 +49,7 @@ Item {
             TextField {
                 id: emailInput
                 placeholderText: "ایمیل"
+                font.family: defaultFont
                 Layout.preferredWidth: 250
                 font.pixelSize: 16
                 inputMethodHints: Qt.ImhEmailCharactersOnly
@@ -53,7 +58,8 @@ Item {
 
             TextField {
                 id: phoneInput
-                placeholderText: "شماره موبایل ( مثلاً 09121234567 )"
+                placeholderText: "شماره موبایل ( مثلاً  09121234567 )"
+                font.family: defaultFont
                 Layout.preferredWidth: 250
                 font.pixelSize: 16
                 maximumLength: 11
@@ -61,11 +67,29 @@ Item {
                 inputMethodHints: Qt.ImhDigitsOnly
                 horizontalAlignment: TextInput.AlignHCenter
                 text: ""
+                onTextChanged: {
+                    phoneInput.text = phoneInput.text.replace(/[۰-۹]/g, function(p) {
+                        return String.fromCharCode(p.charCodeAt(0) - 1728)
+                    })
+                }
+            }
+
+            TextField {
+                id: codeInput
+                visible: codeSent
+                placeholderText: "کد ۶ رقمی پیامک شده"
+                font.family: defaultFont
+                Layout.preferredWidth: 250
+                font.pixelSize: 16
+                inputMethodHints: Qt.ImhDigitsOnly
+                validator: RegExpValidator { regExp: /^[0-9]{6}$/ }
+                horizontalAlignment: TextInput.AlignHCenter
             }
 
             Button {
                 id: registerBtn
-                text: "ارسال اطلاعات ثبت ‌نام"
+                text: codeSent ? "تایید کد و ثبت ‌نام" : "ثبت ‌نام"
+                font.family: defaultFont
                 enabled: !resendTimer.running
                 Layout.preferredWidth: 250
                 background: Rectangle {
@@ -74,37 +98,63 @@ Item {
                 }
 
                 onClicked: {
-                    if (!/^09[0-9]{9}$/.test(phoneInput.text)) {
-                        statusText.text = "شماره موبایل نامعتبر است"
-                        return
+                    if (!codeSent) {
+                        if (!/^09[0-9]{9}$/.test(phoneInput.text)) {
+                            statusText.text = "شماره موبایل نامعتبر است"
+                            return
+                        }
+                        if (emailInput.text.length < 5 || emailInput.text.indexOf("@") === -1) {
+                            statusText.text = "ایمیل نامعتبر است"
+                            return
+                        }
+                        if (nameInput.text.trim() === "" || familyInput.text.trim() === "") {
+                            statusText.text = "نام و نام خانوادگی را وارد کنید"
+                            return
+                        }
+                        statusText.text = "در حال ارسال کد تایید . . ."
+                        secondsRemaining = 59
+                        resendTimer.start()
+                        sendCodeRequest()
+                    } else {
+                        if (!/^[0-9]{6}$/.test(codeInput.text)) {
+                            statusText.text = "کد وارد شده نامعتبر است"
+                            return
+                        }
+                        statusText.text = "در حال تایید کد . . ."
+                        submitRegistration()
                     }
-                    if (emailInput.text.length < 5 || emailInput.text.indexOf("@") === -1) {
-                        statusText.text = "ایمیل نامعتبر است"
-                        return
-                    }
-                    if (nameInput.text.trim() === "" || familyInput.text.trim() === "") {
-                        statusText.text = "نام و نام خانوادگی را وارد کنید"
-                        return
-                    }
-
-                    statusText.text = "در حال ارسال اطلاعات . . ."
-                    secondsRemaining = 59
-                    resendTimer.start()
-                    registerUser()
                 }
             }
 
             Text {
                 id: timerText
-                visible: resendTimer.running
+                visible: resendTimer.running && codeSent
+                font.family: defaultFont
                 text: "امکان ارسال مجدد تا " + secondsRemaining + " ثانیه دیگر"
                 color: "#bbbbbb"
                 font.pixelSize: 13
                 Layout.alignment: Qt.AlignHCenter
             }
 
+            Button {
+                id: loginInsteadBtn
+                visible: false
+                text: "ورود به حساب"
+                font.family: defaultFont
+                Layout.preferredWidth: 250
+                background: Rectangle {
+                    color: "#1976d2"
+                    radius: 10
+                }
+                onClicked: {
+                    stackView.clear()
+                    stackView.push("qrc:/gui/LoginWithPhone.qml")
+                }
+            }
+
             Text {
                 id: statusText
+                font.family: defaultFont
                 color: "white"
                 font.pixelSize: 14
                 wrapMode: Text.WrapAnywhere
@@ -119,7 +169,6 @@ Item {
         interval: 1000
         repeat: true
         running: false
-
         onTriggered: {
             if (secondsRemaining > 0) {
                 secondsRemaining--
@@ -129,29 +178,27 @@ Item {
         }
     }
 
-    function registerUser() {
+    function sendCodeRequest() {
         var xhr = new XMLHttpRequest()
         xhr.open("POST", "https://bazicloud.com/wp-json/amncloud/v1/register")
         xhr.setRequestHeader("Content-Type", "application/json")
 
-        xhr.onreadystatechange = function() {
+        xhr.onreadystatechange = function () {
             if (xhr.readyState === XMLHttpRequest.DONE) {
-                if (xhr.status === 200) {
-                    try {
-                        var response = JSON.parse(xhr.responseText)
-                        if (response.status === "exists") {
-                            statusText.text = "شما قبلاً ثبت‌ نام کرده‌اید"
-                        } else if (response.status === "success") {
-                            statusText.text = "ثبت ‌نام موفق بود. ارسال کد تأیید . . ."
-                            stackView.push("qrc:/gui/VerifyCode.qml", { phone: phoneInput.text })
-                        } else {
-                            statusText.text = response.message || "خطای ناشناخته هنگام ثبت‌ نام"
-                        }
-                    } catch (e) {
-                        statusText.text = "خطا در پردازش پاسخ سرور"
+                try {
+                    var response = JSON.parse(xhr.responseText)
+                    if (response.status === "exists") {
+                        statusText.text = "کاربر با این مشخصات قبلاً ثبت‌ نام کرده است"
+                        loginInsteadBtn.visible = true
+                    } else if (response.status === "success") {
+                        statusText.text = "کد تایید ارسال شد . لطفاً آن را وارد کنید"
+                        codeSent = true
+                        codeInput.focus = true
+                    } else {
+                        statusText.text = response.message || "خطای ناشناخته هنگام ارسال کد"
                     }
-                } else {
-                    statusText.text = "ثبت ‌نام انجام نشد . مجدد تلاش کنید"
+                } catch (e) {
+                    statusText.text = "خطا در پردازش پاسخ سرور"
                 }
             }
         }
@@ -161,6 +208,34 @@ Item {
             family: familyInput.text,
             email: emailInput.text,
             phone: phoneInput.text
+        }))
+    }
+
+    function submitRegistration() {
+        var xhr = new XMLHttpRequest()
+        xhr.open("POST", "https://bazicloud.com/wp-json/amncloud/v1/verify-code")
+        xhr.setRequestHeader("Content-Type", "application/json")
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                try {
+                    var res = JSON.parse(xhr.responseText)
+                    if (res.status === "success" || res.success === true) {
+                        statusText.text = "✅ ثبت ‌نام با موفقیت انجام شد"
+                        stackView.clear()
+                        stackView.push("qrc:/gui/Dashboard.qml")
+                    } else {
+                        statusText.text = res.message || "کد اشتباه است یا منقضی شده"
+                    }
+                } catch (e) {
+                    statusText.text = "❌ خطا در پردازش پاسخ سرور"
+                }
+            }
+        }
+
+        xhr.send(JSON.stringify({
+            phone: phoneInput.text,
+            code: codeInput.text
         }))
     }
 

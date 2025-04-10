@@ -10,6 +10,13 @@ import StreamingPreferences 1.0
 import SystemProperties 1.0
 import SdlGamepadKeyNavigation 1.0
 
+FontLoader {
+    id: iranFont
+    source: "qrc:/fonts/IRANSans.ttf"
+}
+
+property string defaultFont: iranFont.name
+
 ApplicationWindow {
     property bool pollingActive: false
 
@@ -100,11 +107,10 @@ ApplicationWindow {
         focus: true
 
         Component.onCompleted: {
-            // Perform our early initialization before constructing
-            // the initial view and pushing it to the StackView
-            doEarlyInit()
-            push("qrc:/gui/LoginWithPhone.qml")
-        }
+        doEarlyInit()
+        stackView.clear()
+        stackView.push("qrc:/gui/LoginWithPhone.qml")
+            }
 
         onCurrentItemChanged: {
             // Ensure focus travels to the next view when going back
