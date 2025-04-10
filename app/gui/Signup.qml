@@ -88,7 +88,7 @@ Item {
 
             Button {
                 id: registerBtn
-                text: codeSent ? "تایید کد و ثبت ‌نام" : "ثبت ‌نام"
+                text: codeSent ? "تایید کد و ثبت ‌نام" : "ارسال کد تایید"
                 font.family: defaultFont
                 enabled: !resendTimer.running
                 Layout.preferredWidth: 250
@@ -120,7 +120,7 @@ Item {
                             statusText.text = "کد وارد شده نامعتبر است"
                             return
                         }
-                        statusText.text = "در حال تایید کد . . ."
+                        statusText.text = "در حال تایید کد و تکمیل ثبت نام . . ."
                         submitRegistration()
                     }
                 }
@@ -180,25 +180,32 @@ Item {
 
     function sendCodeRequest() {
         var xhr = new XMLHttpRequest()
-        xhr.open("POST", "https://bazicloud.com/wp-json/amncloud/v1/register")
+        xhr.open("POST", "https://bazicloud.com/wp-json/amncloud/v1/request-registration-code")
         xhr.setRequestHeader("Content-Type", "application/json")
 
         xhr.onreadystatechange = function () {
             if (xhr.readyState === XMLHttpRequest.DONE) {
+                resendTimer.stop()
+                secondsRemaining = 0
+                registerBtn.enabled = true
+
                 try {
                     var response = JSON.parse(xhr.responseText)
-                    if (response.status === "exists") {
-                        statusText.text = "کاربر با این مشخصات قبلاً ثبت‌ نام کرده است"
-                        loginInsteadBtn.visible = true
-                    } else if (response.status === "success") {
-                        statusText.text = "کد تایید ارسال شد . لطفاً آن را وارد کنید"
+
+                    if (xhr.status === 200 && response.success === true) {
+                        statusText.text = response.message || "کد تایید ارسال شد . لطفاً آن را وارد کنید"
                         codeSent = true
                         codeInput.focus = true
-                    } else {
+
+                    } else if (xhr.status === 409) {
+                        statusText.text = response.message || "موبایل یا ایمیل قبلاً ثبت شده است"
+                        loginInsteadBtn.visible = true
+                    }
+                     else {
                         statusText.text = response.message || "خطای ناشناخته هنگام ارسال کد"
                     }
                 } catch (e) {
-                    statusText.text = "خطا در پردازش پاسخ سرور"
+                    statusText.text = "خطا در ارتباط با سرور یا پاسخ نامعتبر"
                 }
             }
         }
@@ -213,22 +220,25 @@ Item {
 
     function submitRegistration() {
         var xhr = new XMLHttpRequest()
-        xhr.open("POST", "https://bazicloud.com/wp-json/amncloud/v1/verify-code")
+        xhr.open("POST", "https://bazicloud.com/wp-json/amncloud/v1/complete-registration")
         xhr.setRequestHeader("Content-Type", "application/json")
 
         xhr.onreadystatechange = function () {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 try {
                     var res = JSON.parse(xhr.responseText)
-                    if (res.status === "success" || res.success === true) {
+
+                    if (xhr.status === 200 && (res.status === "success" || res.success === true)) {
                         statusText.text = "✅ ثبت ‌نام با موفقیت انجام شد"
+
                         stackView.clear()
                         stackView.push("qrc:/gui/Dashboard.qml")
                     } else {
-                        statusText.text = res.message || "کد اشتباه است یا منقضی شده"
+
+                        statusText.text = res.message || "کد اشتباه است یا منقضی شده یا خطای دیگری رخ داد"
                     }
                 } catch (e) {
-                    statusText.text = "❌ خطا در پردازش پاسخ سرور"
+                    statusText.text = "❌ خطا در پردازش پاسخ سرور هنگام تایید کد"
                 }
             }
         }
