@@ -10,6 +10,7 @@ Item {
 
     property int secondsRemaining: 59
     property bool codeSent: false
+    property string initialPhone: "" 
 
     Rectangle {
         anchors.fill: parent
@@ -35,6 +36,7 @@ Item {
                 Layout.preferredWidth: 250
                 font.pixelSize: 16
                 horizontalAlignment: TextInput.AlignHCenter
+                visible: !codeSent 
             }
 
             TextField {
@@ -44,6 +46,7 @@ Item {
                 Layout.preferredWidth: 250
                 font.pixelSize: 16
                 horizontalAlignment: TextInput.AlignHCenter
+                 visible: !codeSent 
             }
 
             TextField {
@@ -54,6 +57,7 @@ Item {
                 font.pixelSize: 16
                 inputMethodHints: Qt.ImhEmailCharactersOnly
                 horizontalAlignment: TextInput.AlignHCenter
+                 visible: !codeSent 
             }
 
             TextField {
@@ -66,7 +70,10 @@ Item {
                 validator: RegExpValidator { regExp: /^09[0-9]{0,9}$/ }
                 inputMethodHints: Qt.ImhDigitsOnly
                 horizontalAlignment: TextInput.AlignHCenter
-                text: ""
+                text: initialPhone 
+                 visible: !codeSent 
+                 enabled: !codeSent 
+
                 onTextChanged: {
                     phoneInput.text = phoneInput.text.replace(/[۰-۹]/g, function(p) {
                         return String.fromCharCode(p.charCodeAt(0) - 1728)
@@ -76,7 +83,7 @@ Item {
 
             TextField {
                 id: codeInput
-                visible: codeSent
+                visible: codeSent 
                 placeholderText: "کد ۶ رقمی پیامک شده"
                 font.family: defaultFont
                 Layout.preferredWidth: 250
@@ -93,7 +100,7 @@ Item {
                 enabled: !resendTimer.running
                 Layout.preferredWidth: 250
                 background: Rectangle {
-                    color: resendTimer.running ? "#555555" : "#00c853"
+                    color: registerBtn.enabled ? "#00c853" : "#555555" 
                     radius: 10
                 }
 
@@ -112,6 +119,7 @@ Item {
                             return
                         }
                         statusText.text = "در حال ارسال کد تایید . . ."
+                        registerBtn.enabled = false 
                         secondsRemaining = 59
                         resendTimer.start()
                         sendCodeRequest()
@@ -121,6 +129,7 @@ Item {
                             return
                         }
                         statusText.text = "در حال تایید کد و تکمیل ثبت نام . . ."
+                        registerBtn.enabled = false 
                         submitRegistration()
                     }
                 }
@@ -130,7 +139,7 @@ Item {
                 id: timerText
                 visible: resendTimer.running && codeSent
                 font.family: defaultFont
-                text: "امکان ارسال مجدد تا " + secondsRemaining + " ثانیه دیگر"
+                text: "امکان ارسال مجدد تا " + secondsRemaining + " ثانیه دیگر" 
                 color: "#bbbbbb"
                 font.pixelSize: 13
                 Layout.alignment: Qt.AlignHCenter
@@ -147,8 +156,12 @@ Item {
                     radius: 10
                 }
                 onClicked: {
-                    stackView.clear()
-                    stackView.push("qrc:/gui/LoginWithPhone.qml")
+                     if (typeof stackView !== 'undefined') {
+                         stackView.clear()
+                         stackView.push("qrc:/gui/LoginWithPhone.qml")
+                     } else {
+                         console.error("stackView is not defined/accessible from Signup.qml")
+                     }
                 }
             }
 
@@ -174,6 +187,7 @@ Item {
                 secondsRemaining--
             } else {
                 running = false
+                 registerBtn.enabled = true 
             }
         }
     }
@@ -185,9 +199,8 @@ Item {
 
         xhr.onreadystatechange = function () {
             if (xhr.readyState === XMLHttpRequest.DONE) {
-                resendTimer.stop()
-                secondsRemaining = 0
-                registerBtn.enabled = true
+
+                 registerBtn.enabled = !resendTimer.running 
 
                 try {
                     var response = JSON.parse(xhr.responseText)
@@ -198,14 +211,21 @@ Item {
                         codeInput.focus = true
 
                     } else if (xhr.status === 409) {
-                        statusText.text = response.message || "موبایل یا ایمیل قبلاً ثبت شده است"
-                        loginInsteadBtn.visible = true
+                         resendTimer.stop() 
+                         registerBtn.enabled = true
+                         statusText.text = response.message || "موبایل یا ایمیل قبلاً ثبت شده است."
+                         loginInsteadBtn.visible = true
                     }
                      else {
-                        statusText.text = response.message || "خطای ناشناخته هنگام ارسال کد"
+                         resendTimer.stop() 
+                         registerBtn.enabled = true
+                         statusText.text = response.message || "خطای ناشناخته هنگام ارسال کد"
                     }
                 } catch (e) {
-                    statusText.text = "خطا در ارتباط با سرور یا پاسخ نامعتبر"
+                     resendTimer.stop()
+                     registerBtn.enabled = true
+                     statusText.text = "خطا در ارتباط با سرور یا پاسخ نامعتبر"
+                     console.error("Error parsing request-reg response:", e, xhr.responseText);
                 }
             }
         }
@@ -225,20 +245,27 @@ Item {
 
         xhr.onreadystatechange = function () {
             if (xhr.readyState === XMLHttpRequest.DONE) {
+                 registerBtn.enabled = true 
+
                 try {
                     var res = JSON.parse(xhr.responseText)
 
-                    if (xhr.status === 200 && (res.status === "success" || res.success === true)) {
+                    if (xhr.status === 200 && (res.success === true)) {
                         statusText.text = "✅ ثبت ‌نام با موفقیت انجام شد"
 
-                        stackView.clear()
-                        stackView.push("qrc:/gui/Dashboard.qml")
-                    } else {
+                         if (typeof stackView !== 'undefined') {
+                             stackView.clear()
+                             stackView.push("qrc:/gui/Dashboard.qml")
+                         } else {
+                              console.error("stackView is not defined/accessible from Signup.qml")
+                         }
 
+                    } else {
                         statusText.text = res.message || "کد اشتباه است یا منقضی شده یا خطای دیگری رخ داد"
                     }
                 } catch (e) {
                     statusText.text = "❌ خطا در پردازش پاسخ سرور هنگام تایید کد"
+                     console.error("Error parsing complete-reg response:", e, xhr.responseText);
                 }
             }
         }
@@ -253,5 +280,6 @@ Item {
         if (typeof mainToolBar !== 'undefined') mainToolBar.visible = false
         if (typeof settingsButton !== 'undefined') settingsButton.visible = false
         if (typeof topMenu !== 'undefined') topMenu.visible = false
+        nameInput.forceActiveFocus() 
     }
 }

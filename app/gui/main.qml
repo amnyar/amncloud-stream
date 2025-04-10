@@ -10,7 +10,6 @@ import StreamingPreferences 1.0
 import SystemProperties 1.0
 import SdlGamepadKeyNavigation 1.0
 
-
 ApplicationWindow {
 
     property string defaultFont: iranFont.name
@@ -26,6 +25,7 @@ ApplicationWindow {
     id: window
     width: 1280
     height: 600
+    title: "Bazi Cloud" 
 
     function doEarlyInit() {
         if (SystemProperties.usesMaterial3Theme) {
@@ -94,7 +94,8 @@ ApplicationWindow {
         Component.onCompleted: {
              doEarlyInit()
              stackView.clear()
-             stackView.push("qrc:/gui/LoginWithPhone.qml")
+             //stackView.push("qrc:/gui/LoginWithPhone.qml") 
+              stackView.push("qrc:/gui/Dashboard.qml") 
         }
 
         onCurrentItemChanged: {
@@ -122,11 +123,11 @@ ApplicationWindow {
         }
 
         Keys.onMenuPressed: {
-             if (settingsButton) settingsButton.clicked()
+             if (settingsButton && settingsButton.visible) settingsButton.clicked() 
         }
 
         Keys.onHangupPressed: {
-             if (settingsButton) settingsButton.clicked()
+             if (settingsButton && settingsButton.visible) settingsButton.clicked() 
         }
     }
 
@@ -201,11 +202,11 @@ ApplicationWindow {
         anchors.topMargin: 5
         anchors.bottomMargin: 5
 
-        Label {
+        Label { 
             id: titleLabel
             visible: toolBar.width > 700
             anchors.fill: parent
-            text: stackView.currentItem ? stackView.currentItem.objectName : "" // Check currentItem
+            text: "Bazi Cloud" 
             font.pointSize: 20
             elide: Label.ElideRight
             horizontalAlignment: Qt.AlignHCenter
@@ -219,7 +220,8 @@ ApplicationWindow {
             anchors.rightMargin: 10
             anchors.fill: parent
 
-            NavigableToolButton {
+            NavigableToolButton { 
+                id: backNavButton
                 visible: stackView.depth > 1
                 iconSource: "qrc:/res/arrow_left.svg"
                 onClicked: goBack()
@@ -228,7 +230,7 @@ ApplicationWindow {
                 }
             }
 
-            Label {
+            Label { 
                 id: titleRowLabel
                 font.pointSize: titleLabel.font.pointSize
                 elide: Label.ElideRight
@@ -236,12 +238,12 @@ ApplicationWindow {
                 verticalAlignment: Qt.AlignVCenter
                 Layout.fillWidth: true
                 font.family: defaultFont
-                text: (!titleLabel.visible && stackView.currentItem) ? stackView.currentItem.objectName : "" // Check currentItem
+                text: !titleLabel.visible ? "Bazi Cloud" : "" 
             }
 
-            Label {
+            Label { 
                 id: versionLabel
-                visible: stackView.currentItem ? qmltypeof(stackView.currentItem, "SettingsView") : false // Check currentItem
+                visible: stackView.currentItem ? qmltypeof(stackView.currentItem, "SettingsView") : false
                 text: qsTr("Version %1").arg(SystemProperties.versionString)
                 font.pointSize: 12
                 horizontalAlignment: Qt.AlignRight
@@ -249,56 +251,35 @@ ApplicationWindow {
                 font.family: defaultFont
             }
 
-            NavigableToolButton {
+            NavigableToolButton { 
                 id: discordButton
-                visible: SystemProperties.hasBrowser && (stackView.currentItem ? qmltypeof(stackView.currentItem, "SettingsView") : false) // Check currentItem
+                visible: SystemProperties.hasBrowser && (stackView.currentItem ? qmltypeof(stackView.currentItem, "SettingsView") : false)
                 iconSource: "qrc:/res/discord.svg"
-                ToolTip.delay: 1000
-                ToolTip.timeout: 3000
-                ToolTip.visible: hovered
+                ToolTip.delay: 1000; ToolTip.timeout: 3000; ToolTip.visible: hovered
                 ToolTip.text: qsTr("Join our community on Discord")
                 onClicked: Qt.openUrlExternally("https://moonlight-stream.org/discord");
-                Keys.onDownPressed: {
-                     if (stackView.currentItem) stackView.currentItem.forceActiveFocus(Qt.TabFocus)
-                }
+                Keys.onDownPressed: { if (stackView.currentItem) stackView.currentItem.forceActiveFocus(Qt.TabFocus) }
             }
 
-            NavigableToolButton {
+            NavigableToolButton { 
                 id: addPcButton
-                visible: stackView.currentItem ? qmltypeof(stackView.currentItem, "PcView") : false // Check currentItem
+                visible: stackView.currentItem ? qmltypeof(stackView.currentItem, "PcView") : false
                 iconSource:  "qrc:/res/ic_add_to_queue_white_48px.svg"
-                ToolTip.delay: 1000
-                ToolTip.timeout: 3000
-                ToolTip.visible: hovered
+                ToolTip.delay: 1000; ToolTip.timeout: 3000; ToolTip.visible: hovered
                 ToolTip.text: qsTr("Add PC manually") + (newPcShortcut.nativeText ? (" ("+newPcShortcut.nativeText+")") : "")
-                Shortcut {
-                    id: newPcShortcut
-                    sequence: StandardKey.New
-                    onActivated: addPcButton.clicked()
-                }
-                onClicked: {
-                    addPcDialog.open()
-                }
-                Keys.onDownPressed: {
-                     if (stackView.currentItem) stackView.currentItem.forceActiveFocus(Qt.TabFocus)
-                }
+                Shortcut { id: newPcShortcut; sequence: StandardKey.New; onActivated: addPcButton.clicked() }
+                onClicked: { addPcDialog.open() }
+                Keys.onDownPressed: { if (stackView.currentItem) stackView.currentItem.forceActiveFocus(Qt.TabFocus) }
             }
 
-            NavigableToolButton {
+            NavigableToolButton { 
                 property string browserUrl: ""
                 id: updateButton
                 iconSource: "qrc:/res/update.svg"
-                ToolTip.delay: 1000
-                ToolTip.timeout: 3000
-                ToolTip.visible: hovered || visible
+                ToolTip.delay: 1000; ToolTip.timeout: 3000; ToolTip.visible: hovered || visible
                 visible: false
-                onClicked: {
-                    if (SystemProperties.hasBrowser) {
-                        Qt.openUrlExternally(browserUrl);
-                    }
-                }
-                function updateAvailable(version, url)
-                {
+                onClicked: { if (SystemProperties.hasBrowser) { Qt.openUrlExternally(browserUrl); } }
+                function updateAvailable(version, url) {
                     ToolTip.text = qsTr("Update available for Moonlight: Version %1").arg(version)
                     updateButton.browserUrl = url
                     updateButton.visible = true
@@ -307,146 +288,63 @@ ApplicationWindow {
                     AutoUpdateChecker.onUpdateAvailable.connect(updateAvailable)
                     AutoUpdateChecker.start()
                 }
-                Keys.onDownPressed: {
-                     if (stackView.currentItem) stackView.currentItem.forceActiveFocus(Qt.TabFocus)
-                }
+                Keys.onDownPressed: { if (stackView.currentItem) stackView.currentItem.forceActiveFocus(Qt.TabFocus) }
             }
 
-            NavigableToolButton {
+            NavigableToolButton { 
                 id: helpButton
                 visible: SystemProperties.hasBrowser
                 iconSource: "qrc:/res/question_mark.svg"
-                ToolTip.delay: 1000
-                ToolTip.timeout: 3000
-                ToolTip.visible: hovered
+                ToolTip.delay: 1000; ToolTip.timeout: 3000; ToolTip.visible: hovered
                 ToolTip.text: qsTr("Help") + (helpShortcut.nativeText ? (" ("+helpShortcut.nativeText+")") : "")
-                Shortcut {
-                    id: helpShortcut
-                    sequence: StandardKey.HelpContents
-                    onActivated: helpButton.clicked()
-                }
+                Shortcut { id: helpShortcut; sequence: StandardKey.HelpContents; onActivated: helpButton.clicked() }
                 onClicked: Qt.openUrlExternally("https://github.com/moonlight-stream/moonlight-docs/wiki/Setup-Guide");
-                Keys.onDownPressed: {
-                     if (stackView.currentItem) stackView.currentItem.forceActiveFocus(Qt.TabFocus)
-                }
+                Keys.onDownPressed: { if (stackView.currentItem) stackView.currentItem.forceActiveFocus(Qt.TabFocus) }
             }
 
-            NavigableToolButton {
-                visible: false
-                ToolTip.delay: 1000
-                ToolTip.timeout: 3000
-                ToolTip.visible: hovered
-                ToolTip.text: qsTr("Gamepad Mapper")
-                iconSource: "qrc:/res/ic_videogame_asset_white_48px.svg"
-                onClicked: navigateTo("qrc:/gui/GamepadMapper.qml", "GamepadMapper")
-                Keys.onDownPressed: {
-                     if (stackView.currentItem) stackView.currentItem.forceActiveFocus(Qt.TabFocus)
-                }
+            NavigableToolButton { 
+                 visible: false
+                 ToolTip.delay: 1000; ToolTip.timeout: 3000; ToolTip.visible: hovered
+                 ToolTip.text: qsTr("Gamepad Mapper")
+                 iconSource: "qrc:/res/ic_videogame_asset_white_48px.svg"
+                 onClicked: navigateTo("qrc:/gui/GamepadMapper.qml", "GamepadMapper")
+                 Keys.onDownPressed: { if (stackView.currentItem) stackView.currentItem.forceActiveFocus(Qt.TabFocus) }
             }
 
-            NavigableToolButton {
-                id: settingsButton // This is the button referenced elsewhere
+            NavigableToolButton { 
+                id: settingsButton
                 iconSource:  "qrc:/res/settings.svg"
                 onClicked: navigateTo("qrc:/gui/SettingsView.qml", "SettingsView")
-                Keys.onDownPressed: {
-                     if (stackView.currentItem) stackView.currentItem.forceActiveFocus(Qt.TabFocus)
-                }
-                Shortcut {
-                    id: settingsShortcut
-                    sequence: StandardKey.Preferences
-                    onActivated: settingsButton.clicked()
-                }
-                ToolTip.delay: 1000
-                ToolTip.timeout: 3000
-                ToolTip.visible: hovered
+                Keys.onDownPressed: { if (stackView.currentItem) stackView.currentItem.forceActiveFocus(Qt.TabFocus) }
+                Shortcut { id: settingsShortcut; sequence: StandardKey.Preferences; onActivated: settingsButton.clicked() }
+                ToolTip.delay: 1000; ToolTip.timeout: 3000; ToolTip.visible: hovered
                 ToolTip.text: qsTr("Settings") + (settingsShortcut.nativeText ? (" ("+settingsShortcut.nativeText+")") : "")
             }
         }
     }
 
-    ErrorMessageDialog {
-        id: noHwDecoderDialog
-        text: qsTr("No functioning hardware accelerated video decoder was detected by Moonlight. Your streaming performance may be severely degraded in this configuration.")
-        helpText: qsTr("Click the Help button for more information on solving this problem.")
-        helpUrl: "https://github.com/moonlight-stream/moonlight-docs/wiki/Fixing-Hardware-Decoding-Problems"
-    }
-
-    ErrorMessageDialog {
-        id: xWaylandDialog
-        text: qsTr("Hardware acceleration doesn't work on XWayland. Continuing on XWayland may result in poor streaming performance. Try running with QT_QPA_PLATFORM=wayland or switch to X11.")
-        helpText: qsTr("Click the Help button for more information.")
-        helpUrl: "https://github.com/moonlight-stream/moonlight-docs/wiki/Fixing-Hardware-Decoding-Problems"
-    }
-
-    NavigableMessageDialog {
-        id: wow64Dialog
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        text: qsTr("This version of Moonlight isn't optimized for your PC. Please download the '%1' version of Moonlight for the best streaming performance.").arg(SystemProperties.friendlyNativeArchName)
-        onAccepted: {
-            Qt.openUrlExternally("https://github.com/moonlight-stream/moonlight-qt/releases");
-        }
-    }
-
-    ErrorMessageDialog {
-        id: unmappedGamepadDialog
-        property string unmappedGamepads : ""
-        text: qsTr("Moonlight detected gamepads without a mapping:") + "\n" + unmappedGamepads
-        helpTextSeparator: "\n\n"
-        helpText: qsTr("Click the Help button for information on how to map your gamepads.")
-        helpUrl: "https://github.com/moonlight-stream/moonlight-docs/wiki/Gamepad-Mapping"
-    }
-
-    NavigableMessageDialog {
-        id: quitConfirmationDialog
-        standardButtons: Dialog.Yes | Dialog.No
-        text: qsTr("Are you sure you want to quit?")
-        onAccepted: Qt.quit()
-    }
-
-    ErrorMessageDialog {
-        id: streamSegueErrorDialog
-        property bool quitAfter: false
-        onClosed: {
-            if (quitAfter) {
-                Qt.quit()
-            }
-            text = ""
-        }
-    }
-
+    ErrorMessageDialog { id: noHwDecoderDialog; text: qsTr("..."); helpText: qsTr("..."); helpUrl: "..." }
+    ErrorMessageDialog { id: xWaylandDialog; text: qsTr("..."); helpText: qsTr("..."); helpUrl: "..." }
+    NavigableMessageDialog { id: wow64Dialog; standardButtons: Dialog.Ok | Dialog.Cancel; text: qsTr("..."); onAccepted: { Qt.openUrlExternally("..."); } }
+    ErrorMessageDialog { id: unmappedGamepadDialog; property string unmappedGamepads : ""; text: qsTr("...") + "\n" + unmappedGamepads; helpTextSeparator: "\n\n"; helpText: qsTr("..."); helpUrl: "..." }
+    NavigableMessageDialog { id: quitConfirmationDialog; standardButtons: Dialog.Yes | Dialog.No; text: qsTr("Are you sure you want to quit?"); onAccepted: Qt.quit() }
+    ErrorMessageDialog { id: streamSegueErrorDialog; property bool quitAfter: false; onClosed: { if (quitAfter) { Qt.quit() } text = "" } }
     NavigableDialog {
         id: addPcDialog
         property string label: qsTr("Enter the IP address of your host PC:")
         standardButtons: Dialog.Ok | Dialog.Cancel
-        onOpened: {
-            editText.forceActiveFocus()
-        }
-        onClosed: {
-            editText.clear()
-        }
-        onAccepted: {
-            if (editText.text) {
-                ComputerManager.addNewHostManually(editText.text.trim())
-            }
-        }
-
+        onOpened: { editText.forceActiveFocus() }
+        onClosed: { editText.clear() }
+        onAccepted: { if (editText.text) { ComputerManager.addNewHostManually(editText.text.trim()) } }
         ColumnLayout {
-            Label {
-                text: addPcDialog.label
-                font.bold: true
-                font.family: defaultFont
-            }
+            Label { text: addPcDialog.label; font.bold: true; font.family: defaultFont }
             TextField {
                 id: editText
                 Layout.fillWidth: true
                 focus: true
                 font.family: defaultFont
-                Keys.onReturnPressed: {
-                    addPcDialog.accept()
-                }
-                Keys.onEnterPressed: {
-                    addPcDialog.accept()
-                }
+                Keys.onReturnPressed: { addPcDialog.accept() }
+                Keys.onEnterPressed: { addPcDialog.accept() }
             }
         }
     }

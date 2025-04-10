@@ -73,13 +73,11 @@ Item {
                 inputMethodHints: Qt.ImhDigitsOnly
                 echoMode: TextInput.Normal
                 maximumLength: 11
-                inputMask: "09999999999;_"
                 validator: RegExpValidator { regExp: /^09[0-9]{0,9}$/ }
                 horizontalAlignment: TextInput.AlignHCenter
                 text: ""
 
                 onTextChanged: {
-                   
                     phoneInput.text = phoneInput.text.replace(/[۰-۹]/g, function(p) {
                         return String.fromCharCode(p.charCodeAt(0) - 1728)
                     })
@@ -147,7 +145,12 @@ Item {
                 }
 
                 onClicked: {
-                    stackView.push("qrc:/gui/Signup.qml", { phone: phoneInput.text })
+                    // Assuming stackView is accessible globally or passed as property
+                    if (typeof stackView !== 'undefined') {
+                        stackView.push("qrc:/gui/Signup.qml", { phone: phoneInput.text })
+                    } else {
+                         console.error("stackView is not defined/accessible from LoginWithPhone.qml")
+                    }
                 }
             }
         }
@@ -155,29 +158,39 @@ Item {
 
     function sendCodeToApi(phoneNumber) {
         var xhr = new XMLHttpRequest()
-        xhr.open("POST", "https://bazicloud.com/wp-json/amncloud/v1/send-code")
+        xhr.open("POST", "https://bazicloud.com/wp-json/amncloud/v1/send-code") // Assuming this API still exists for login
         xhr.setRequestHeader("Content-Type", "application/json")
 
         xhr.onreadystatechange = function() {
             if (xhr.readyState === XMLHttpRequest.DONE) {
+                 resendTimer.stop()
+                 timerSeconds = 0
+                 sendCodeBtn.enabled = true
+                 timerText.visible = false
+
                 if (xhr.status === 200) {
                     try {
-                        var component = Qt.createComponent("qrc:/gui/VerifyCode.qml")
-                        if (component.status === Component.Error) {
-                            statusText.text = "فایل تأیید کد یافت نشد"
-                            return
-                        }
-
-                        statusText.text = "کد با موفقیت ارسال شد"
-                        stackView.push("qrc:/gui/VerifyCode.qml", { phone: phoneNumber })
+                         var res = JSON.parse(xhr.responseText);
+                         if (res.success === true) {
+                             statusText.text = "کد با موفقیت ارسال شد"
+                              if (typeof stackView !== 'undefined') {
+                                  stackView.push("qrc:/gui/VerifyCode.qml", { phone: phoneNumber })
+                              } else {
+                                  console.error("stackView is not defined/accessible from LoginWithPhone.qml")
+                              }
+                         } else {
+                             statusText.text = res.message || "خطا در پاسخ سرور هنگام ارسال کد";
+                         }
                     } catch (e) {
-                        statusText.text = "خطا در بارگذاری فایل VerifyCode"
+                         statusText.text = "خطا در پردازش پاسخ سرور";
+                         console.error("Error parsing send-code response:", e, xhr.responseText);
                     }
                 } else if (xhr.status === 404) {
                     statusText.text = "کاربری با این شماره پیدا نشد"
                     signupBtn.visible = true
                 } else {
-                    statusText.text = "خطا در ارسال کد . دوباره تلاش کنید"
+                    statusText.text = "خطا در ارسال کد ("+xhr.status+"). دوباره تلاش کنید"
+                     console.error("send-code API error:", xhr.status, xhr.responseText);
                 }
             }
         }
@@ -189,5 +202,6 @@ Item {
         if (typeof mainToolBar !== 'undefined') mainToolBar.visible = false
         if (typeof settingsButton !== 'undefined') settingsButton.visible = false
         if (typeof topMenu !== 'undefined') topMenu.visible = false
+        phoneInput.forceActiveFocus() // Ensure focus on load
     }
 }
