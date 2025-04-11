@@ -34,7 +34,7 @@ Item {
 
                     Image {
                         id: logo
-                        source: "https://placehold.co/100x40/E74C3C/FFF/png?text=LOGO" // Placeholder URL
+                        source: "qrc:/placeholder_logo.png"
                         Layout.preferredWidth: 100
                         Layout.preferredHeight: 40
                         fillMode: Image.PreserveAspectFit
@@ -45,10 +45,8 @@ Item {
 
                     Button {
                         id: searchBtn
-                        // Use text or placeholder icon URL if available
-                        // icon.source: "https://placehold.co/24x24/ffffff/000000/png?text=S"
-                        text: "?" // Placeholder Text
-                        font.pointSize: 16
+                        icon.source: "qrc:/placeholder_search_icon.png"
+                        icon.color: "white"
                         Layout.preferredWidth: 40
                         Layout.preferredHeight: 40
                         Layout.alignment: Qt.AlignVCenter
@@ -56,10 +54,8 @@ Item {
                     }
                     Button {
                         id: notificationBtn
-                         // Use text or placeholder icon URL if available
-                        // icon.source: "https://placehold.co/24x24/ffffff/000000/png?text=N"
-                        text: "🔔" // Placeholder Emoji
-                        font.pointSize: 16
+                        icon.source: "qrc:/placeholder_notif_icon.png"
+                        icon.color: "white"
                         Layout.preferredWidth: 40
                         Layout.preferredHeight: 40
                         Layout.alignment: Qt.AlignVCenter
@@ -67,15 +63,13 @@ Item {
                     }
                      Button {
                          id: profileBtn
-                         // Use text or placeholder icon URL if available
-                         source: "https://placehold.co/40x40/cccccc/000000/png?text=U" // Placeholder URL
-                         Image { anchors.fill: parent; source: parent.source; fillMode: Image.PreserveAspectFit } // Display image inside button
+                         icon.source: "qrc:/placeholder_avatar.png"
                          Layout.preferredWidth: 40
                          Layout.preferredHeight: 40
                          Layout.alignment: Qt.AlignVCenter
                          flat: true
                          onClicked: {
-                              // stackView.push("qrc:/gui/Profile.qml")
+                              // stackView.push("qrc:/gui/Profile.qml") // Corrected filename
                          }
                      }
                 }
@@ -90,7 +84,7 @@ Item {
                 Image {
                     id: bannerBackground
                     anchors.fill: parent
-                    source: "https://placehold.co/1280x300/555555/FFF/png?text=Banner+Image" // Placeholder URL
+                    source: "qrc:/no_mans_sky_banner.png"
                     fillMode: Image.PreserveAspectCrop
                 }
 
@@ -114,14 +108,14 @@ Item {
                      spacing: 5
 
                      Text {
-                         text: "GAME TITLE BANNER" // Placeholder Text
+                         text: "NO MAN'S SKY"
                          font.pixelSize: 36
                          font.bold: true
                          color: "white"
                          font.family: defaultFont
                      }
                      Text {
-                         text: "Game tagline or description here..." // Placeholder Text
+                         text: "Build for an epic journey."
                          font.pixelSize: 18
                          color: "#dddddd"
                          font.family: defaultFont
@@ -134,9 +128,8 @@ Item {
                      anchors.rightMargin: 30
                      spacing: 15
 
-                    // Using Text placeholders for icons as URL finding is complex/unstable
-                    Text { text: "📅"; font.pixelSize: 20; color: "white" } // Calendar Emoji
-                    Text { text: "🎮"; font.pixelSize: 20; color: "white" } // Controller Emoji
+                    Image { source: "qrc:/placeholder_calendar.png"; width: 24; height: 24; fillMode: Image.PreserveAspectFit }
+                    Image { source: "qrc:/placeholder_controller.png"; width: 24; height: 24; fillMode: Image.PreserveAspectFit }
                     Text { text: "VI"; color: "white"; font.bold: true; font.pixelSize: 16; font.family: defaultFont }
                     Text { text: "۱۲"; color: "white"; font.bold: true; font.pixelSize: 16; font.family: defaultFont }
 
@@ -165,9 +158,22 @@ Item {
                     text: "همه بازی ها"
                     font.family: defaultFont
                     Layout.alignment: Qt.AlignLeft
-                    background: Rectangle { color: "#333333"; radius: 15; border.color: "#555555"; border.width: 1 }
-                    contentItem: Text { text: allGamesBtn.text; font: allGamesBtn.font; color: "white"; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                    padding: 10; leftPadding: 20; rightPadding: 20
+                    background: Rectangle {
+                        color: "#333333"
+                        radius: 15
+                        border.color: "#555555"
+                        border.width: 1
+                    }
+                    contentItem: Text {
+                       text: allGamesBtn.text
+                       font: allGamesBtn.font
+                       color: "white"
+                       horizontalAlignment: Text.AlignHCenter
+                       verticalAlignment: Text.AlignVCenter
+                    }
+                    padding: 10
+                    leftPadding: 20
+                    rightPadding: 20
                  }
 
                  Item {
@@ -196,7 +202,11 @@ Item {
                            font.pointSize: 16
                            width: 35; height: 60
                            background: Rectangle { color: "#444444"; radius: 5; opacity: 0.7 }
-                           onClicked: { if (gameListView.currentIndex > 0) { gameListView.decrementCurrentIndex() } }
+                           onClicked: {
+                                if (gameListView.currentIndex > 0) {
+                                     gameListView.decrementCurrentIndex()
+                                }
+                           }
                            enabled: gameListView.currentIndex > 0
                        }
 
@@ -206,10 +216,14 @@ Item {
                            anchors.verticalCenter: parent.verticalCenter
                            text: ">"
                            font.pointSize: 16
-                           width: 35; height: 60
-                           background: Rectangle { color: "#444444"; radius: 5; opacity: 0.7 }
-                           onClicked: { if (gameListView.currentIndex < gameListView.count - 1) { gameListView.incrementCurrentIndex() } }
-                           enabled: gameListView.currentIndex < gameListView.count - 1
+                            width: 35; height: 60
+                            background: Rectangle { color: "#444444"; radius: 5; opacity: 0.7 }
+                           onClicked: {
+                                if (gameListView.currentIndex < gameListView.count - 1) {
+                                    gameListView.incrementCurrentIndex()
+                                }
+                           }
+                            enabled: gameListView.currentIndex < gameListView.count - 1
                        }
                  }
              }
@@ -218,15 +232,15 @@ Item {
 
     ListModel {
          id: gameListModel
-         ListElement { gameTitle: "Game 1"; posterUrl: "https://placehold.co/150x220/777/FFF/png?text=Game+1" }
-         ListElement { gameTitle: "Game 2"; posterUrl: "https://placehold.co/150x220/888/FFF/png?text=Game+2" }
-         ListElement { gameTitle: "Game 3"; posterUrl: "https://placehold.co/150x220/999/FFF/png?text=Game+3" }
-         ListElement { gameTitle: "Game 4"; posterUrl: "https://placehold.co/150x220/AAA/FFF/png?text=Game+4" }
-         ListElement { gameTitle: "Game 5"; posterUrl: "https://placehold.co/150x220/BBB/FFF/png?text=Game+5" }
-         ListElement { gameTitle: "Game 6"; posterUrl: "https://placehold.co/150x220/CCC/000/png?text=Game+6" }
-         ListElement { gameTitle: "Game 7"; posterUrl: "https://placehold.co/150x220/DDD/000/png?text=Game+7" }
-         ListElement { gameTitle: "Game 8"; posterUrl: "https://placehold.co/150x220/EEE/000/png?text=Game+8" }
-         ListElement { gameTitle: "Game 9"; posterUrl: "https://placehold.co/150x220/FFF/000/png?text=Game+9" }
+         ListElement { gameTitle: "No Man's Sky"; posterUrl: "qrc:/placeholder_poster_nms.png" }
+         ListElement { gameTitle: "Ghost Recon"; posterUrl: "qrc:/placeholder_poster_gr.png" }
+         ListElement { gameTitle: "Age of Mythology"; posterUrl: "qrc:/placeholder_poster_aom.png" }
+         ListElement { gameTitle: "Death's Door"; posterUrl: "qrc:/placeholder_poster_dd.png" }
+         ListElement { gameTitle: "Far Cry 6"; posterUrl: "qrc:/placeholder_poster_fc6.png" }
+         ListElement { gameTitle: "Resident Evil 8"; posterUrl: "qrc:/placeholder_poster_re8.png" }
+         ListElement { gameTitle: "Days Gone"; posterUrl: "qrc:/placeholder_poster_dg.png" }
+         ListElement { gameTitle: "Another Game"; posterUrl: "qrc:/placeholder_poster_ag.png" }
+         ListElement { gameTitle: "Game 9"; posterUrl: "qrc:/placeholder_poster_g9.png" }
     }
 
     Component {
@@ -241,7 +255,6 @@ Item {
                  source: posterUrl
                  fillMode: Image.PreserveAspectCrop
                  smooth: true
-                 asynchronous: true // Good for network images
              }
 
              Rectangle {
@@ -256,13 +269,13 @@ Item {
                   cursorShape: Qt.PointingHandCursor
                   onClicked: {
                       console.log("Clicked game:", gameTitle)
-                      // stackView.push("qrc:/gui/GameLaunchView.qml", { gameId: model.gameId })
+                      // stackView.push("qrc:/gui/GameLaunchView.qml", { gameId: model.gameId }) // Corrected filename
                   }
               }
              focus: true
              Keys.onReturnPressed: {
                  console.log("Launched game:", gameTitle)
-                 // stackView.push("qrc:/gui/GameLaunchView.qml", { gameId: model.gameId })
+                 // stackView.push("qrc:/gui/GameLaunchView.qml", { gameId: model.gameId }) // Corrected filename
              }
          }
     }
