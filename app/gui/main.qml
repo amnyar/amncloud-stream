@@ -27,6 +27,7 @@ ApplicationWindow {
     id: window
     width: 1280
     height: 600
+	title: "Bazi Cloud"
 
     // This function runs prior to creation of the initial StackView item
     function doEarlyInit() {
